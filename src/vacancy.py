@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
 
-class Vacancy(ABC):
-    @abstractmethod
-    def __init__(self):
-        pass
+class Vacancy:
+    def __init__(self, name, salary_from, salary_to, responsibility, requirement, company):
+        self.name = name
+        self.salary_from = salary_from
+        self.salary_to = salary_to
+        self.responsibility = responsibility
+        self.requirement = requirement
+        self.company = company
 
-    @abstractmethod
     def get_param_string(self):
-        pass
-
-
-class SJVacancy(Vacancy):
-    def __init__(self):
         pass

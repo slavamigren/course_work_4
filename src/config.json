@@ -1,0 +1,12 @@
+{
+    "data_file": "data.json",
+    "HH": {
+        "get_city": "https://api.hh.ru/areas",
+        "get_vacancies": "https://api.hh.ru/vacancies"
+    },
+    "SJ": {
+        "API_KEY": "v3.r.137683485.9c1f43e97d89af87146f830f597088ad551686c3.4082fa3c04252a5cfd13e7794230aa13081f4409",
+        "get_city": "https://api.superjob.ru/2.0/towns/",
+        "get_vacancies": "https://api.superjob.ru/2.0/vacancies/"
+    }
+}

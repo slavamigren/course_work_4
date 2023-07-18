@@ -17,7 +17,15 @@ class DataOperations(ABC):
         pass
 
     @abstractmethod
-    def del_data(self):
+    def del_data(self, data_set_number):
+        pass
+
+    @abstractmethod
+    def load_data(self):
+        pass
+
+    @abstractmethod
+    def unload_data(self):
         pass
 
 class VacancyDataOperations(DataOperations):
@@ -29,6 +37,7 @@ class VacancyDataOperations(DataOperations):
         self.load_data()
 
     def load_data(self):
+        """Загружает сохранённые вакансии"""
         with open(self.FILE, 'r', encoding='utf-8') as file:
             try:
                 data = json.load(file)
@@ -42,6 +51,7 @@ class VacancyDataOperations(DataOperations):
                                             'data': [Vacancy().unjsonify(vacancy) for vacancy in set['data']]})
 
     def unload_data(self):
+        """Сохраняет обновлённые вакансии"""
         if not self.data:  # если все данные удалены, просто затираем всё в файле data
             with open(self.FILE, 'w', encoding='utf-8') as file:
                 pass
@@ -55,27 +65,23 @@ class VacancyDataOperations(DataOperations):
             json.dump(final_list_for_json, file, indent=4)
 
     def add_data(self, city, key_words, data):
+        """Добавляет результаты нового поиска"""
         self.data.append({'city': city, 'key_words': key_words, 'data': data})
         self.unload_data()
 
-    def del_data(self, city=None, key_words=None):
-        del_num = None
-        if city:
-            del_key, del_volume = 'city', city
-        else:
-            del_key, del_volume = 'key_words', key_words
-        for set_num in range(len(self.data)):
-            if self.data[set_num][del_key] == del_volume:
-                del_num = set_num
-                break
-        if del_num:
-            del self.data[del_num]
-            self.unload_data()
-            return True
-        return False
+    def del_data(self, data_set_number):
+        """Удаляет результаты поиска по номеру сета"""
+        del self.data[data_set_number]
+        self.unload_data()
+
 
 
     def get_data(self):
+        """Возвращает загруженные данные поиска"""
         return self.data
 
-#if __name__ == '__main__':
+    def __len__(self):
+        return len(self.data)
+
+    def __bool__(self):
+        return len(self.data) > 0

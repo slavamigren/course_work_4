@@ -1,7 +1,7 @@
 from src.JobParser import *
 import pprint
 from itertools import chain
-from DataOperations import VacancyDataOperations
+#from DataOperations import VacancyDataOperations
 
 
 class JobOperations:
@@ -11,15 +11,19 @@ class JobOperations:
 
     def __init__(self):
         self.cities_id = {}
-        self.job_city = 'Москва'
-        self.key_words = ''
-        #self.vacancies = []
-        self.all_data_object = VacancyDataOperations()
+        self.city_name = 'Москва'  # Город для поиска по умолчанию
+        self.key_words = ''  # ключевое слово для поиска по умолчанию
 
 
     def get_city(self, user_city):
+        """
+        Загружает с HH и SJ списки доступных городов с id, пытается найти совпадение с городом,
+        который указал пользователь. Если совпадений нет, возвращает None. Если есть одно совпадение, возвращает
+        кортеж (True, название_города) и сохраняет в self.cities_id номер парсера из JOB_SOURCE и id города для него.
+        Если есть несколько совпадений, возвращает кортеж (False, [список городов с похожими названиями])
+        """
         if not user_city:
-            user_city = self.job_city
+            user_city = self.city_name
         # получаем словарь всех доступных городов на каждом сайте {номер парсера в job_sources: {город: id, город: id,...}}
         all_cities_job_sources = {job_source: parser.get_cities() for job_source, parser in self.JOB_SOURCE.items()}
         found_cities = {}
@@ -37,23 +41,21 @@ class JobOperations:
             self.cities_id = {job_source: (all_cities_job_sources[job_source][city_list[0]]
                                            if len(city_list) == 1 else None) for job_source, city_list in
                               found_cities.items()}
-            self.job_city = [i[0] for i in found_cities.values() if i][0]
-            return True, self.job_city
+            self.city_name = [i[0] for i in found_cities.values() if i][0]
+            return True, self.city_name
 
         # если найдено более одного города на каждом ресурсе возвращаем список всех найденных городов
         return False, list(set(chain(*found_cities.values())))
 
-    def get_key_words(self, key_words):
-        """Получает ключевые слова для поиска"""
-        self.key_words = key_words
 
-    def load_vacancies(self):  #  передаёт найденные на HH и SJ вакансии в объект DataOperations
+    def load_vacancies(self, key_words):
+        """Возвращает массив объектов Vacancy с найденными на HH и SJ вакансиями"""
+        self.key_words = key_words
         vacancies = []
         for job_source, parser in self.JOB_SOURCE.items():
             if self.cities_id[job_source]:
                 vacancies.extend(parser.get_vacancies(self.cities_id[job_source], self.key_words))
-        self.all_data_object.add_data(self.job_city, self.key_words, vacancies)
-
+        return vacancies
 
 
 

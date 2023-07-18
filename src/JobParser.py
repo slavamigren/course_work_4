@@ -11,6 +11,7 @@ import re
 
 class JobParser(ABC):
     """Абстрактный класс для API работных сайтов"""
+
     @abstractmethod
     def __init__(self):
         pass
@@ -26,6 +27,7 @@ class JobParser(ABC):
 
 class HHParser(JobParser):
     """Класс для парсинга HH"""
+
     def __init__(self):
         pass
 
@@ -43,7 +45,6 @@ class HHParser(JobParser):
                 for n in j['areas']:
                     cities_dict[n['name']] = n['id']
         return cities_dict
-
 
     def get_vacancies(self, city_id, key_words):
         """Формирует список с вакансиями в сущностях Vacancy"""
@@ -63,20 +64,21 @@ class HHParser(JobParser):
 
             data = response.content.decode('utf-8')
             jsobj = json.loads(data)
-            #считываем нужные поля в полученной информации, сразу очищаем от html тегов
+            # считываем нужные поля в полученной информации, сразу очищаем от html тегов
             for vacancy in jsobj['items']:
                 vacancies.append(Vacancy(vacancy['name'],
-                                              vacancy['salary']['from'] if vacancy['salary'] is not None else None,
-                                              vacancy['salary']['to'] if vacancy['salary'] is not None else None,
-                                              re.sub(r'<.+?>', '', vacancy['snippet']['responsibility']) if
-                                              vacancy['snippet']['responsibility'] is not None else '-',
-                                              re.sub(r'<.+?>', '', vacancy['snippet']['requirement']) if
-                                              vacancy['snippet']['requirement'] is not None else '-',
-                                              vacancy['employer']['name'],
-                                              vacancy['alternate_url']))
+                                         vacancy['salary']['from'] if vacancy['salary'] is not None and
+                                                                      vacancy['salary']['from'] is not None else 0,
+                                         vacancy['salary']['to'] if vacancy['salary'] is not None and vacancy['salary'][
+                                             'to'] is not None else 0,
+                                         re.sub(r'<.+?>', '', vacancy['snippet']['responsibility']) if
+                                         vacancy['snippet']['responsibility'] is not None else '-',
+                                         re.sub(r'<.+?>', '', vacancy['snippet']['requirement']) if
+                                         vacancy['snippet']['requirement'] is not None else '-',
+                                         vacancy['employer']['name'],
+                                         vacancy['alternate_url']))
             time.sleep(0.2)  # Задержка, чтобы API не выбрасывал ошибку и не блокировать наш IP
         return vacancies
-
 
 
 class SJParser(JobParser):
@@ -114,17 +116,17 @@ class SJParser(JobParser):
 
             for vacancy in jsobj['objects']:
                 vacancies.append(Vacancy(vacancy['profession'],
-                                              vacancy['payment_from'] if vacancy['payment_from'] != 0 else None,
-                                              vacancy['payment_to'] if vacancy['payment_to'] != 0 else None,
-                                              vacancy['candidat'],
-                                              None,
-                                              vacancy['firm_name'],
-                                              vacancy['link']))
+                                         vacancy['payment_from'] if vacancy['payment_from'] != 0 else 0,
+                                         vacancy['payment_to'] if vacancy['payment_to'] != 0 else 0,
+                                         vacancy['candidat'],
+                                         None,
+                                         vacancy['firm_name'],
+                                         vacancy['link']))
             time.sleep(0.2)
         return vacancies
 
 
 if __name__ == "__main__":
     a = HHParser()
-    #a.get_cities()
+    # a.get_cities()
     a.get_vacancies(4, 'коммерческий директор')
